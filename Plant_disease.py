@@ -4,10 +4,11 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier,GradientBoostingClassifier,BaggingClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import GridSearchCV,RandomizedSearchCV
+from sklearn.model_selection import cross_val_score
+#Reading the data file
 df=pd.read_csv("Plant_disease.csv")
 #Scaling the data
 scaler=StandardScaler()
@@ -24,18 +25,25 @@ test_feature=test_set.drop("Target",axis=1)
 test_feature=scaler.fit_transform(test_feature)
 test_label=test_set["Target"]
 #Making the model
-model=DecisionTreeClassifier(ccp_alpha=0.001, criterion='entropy', max_depth= 10, min_samples_leaf=30,min_samples_split=25,min_impurity_decrease=0)
+model=SVC(kernel="rbf")
+model=RandomForestClassifier()
 model.fit(train_feature,train_label)
-prediction=model.predict(test_feature)
-#print(prediction)
+#Cross-validation
+cvs=cross_val_score(model,train_feature,train_label,cv=10,scoring="accuracy")
+#print(cvs)
+#making the prediction
+test_pred=model.predict(test_feature)
+train_pred=model.predict(train_feature)
 #Accuracy
-Acc=accuracy_score(prediction,test_label)
-print(Acc)
-#using the model
-import joblib
-joblib.dump(model,"ABCD.pkl")
-loaded_model = joblib.load("ABCD.pkl")
-l1=[30.7,34.34,65.4,2.32]
-feature=np.array(l1).reshape(1,-1)
-result=loaded_model.predict(feature)
-print(result)
+test_acc=accuracy_score(test_pred,test_label)
+train_acc=accuracy_score(train_label,train_label)
+#using the for testing the joblib file
+#l1=[15.201649380601122,36.87071032809986,5.345501147061558,5.890208238089201]
+#import joblib
+# #joblib.dump(model,"Plant_disease_model.joblib")
+#loaded_model=joblib.load("Plant_disease_model.joblib")
+#f=np.array([l1])
+#y_pred=loaded_model.predict(f)
+#print(y_pred)
+
+
